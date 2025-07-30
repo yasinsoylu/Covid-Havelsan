@@ -1,10 +1,11 @@
 package com.havelsan.api.service;
 
-import com.havelsan.api.model.CovidNews;
+import com.havelsan.api.model.CovidNewsModel;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,14 +22,17 @@ public class DataProcessingService {
             "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak");
 
 
-    public static CovidNews fillInfoModel(String inputText) {
+    public static CovidNewsModel parseNewsAndFillModel(String inputText) {
 
         // Input controlling.
         if (inputText == null || inputText.trim().isEmpty()) {
             return null;
         }
 
-        CovidNews covidNews = new CovidNews();
+        CovidNewsModel covidNews = new CovidNewsModel();
+
+        // Original News
+        covidNews.setTheNews(inputText);
 
         // City and date values can be anywhere in text. That's why no need to split as sentences.
         covidNews.setDate(findDate(inputText));
@@ -43,12 +47,17 @@ public class DataProcessingService {
         String[] sentences = inputText.split("[.]");
         for (String sentence : sentences) {
             sentence = sentence.trim().toLowerCase();
-            if (sentence.contains("vaka")) {
-                System.out.println("Vaka: " + sentence);
-            } else if (sentence.contains("vefat")) {
-                System.out.println("Vefat: " + sentence);
-            } else if (sentence.contains("taburcu")) {
-                System.out.println("Taburcu: " + sentence);
+
+            if (covidNews.getCaseCount() == null && sentence.contains("vaka")) {
+                covidNews.setCaseCount(findNumber(sentence));
+            }
+
+            if (covidNews.getDeathCount() == null && sentence.contains("vefat")) {
+                covidNews.setDeathCount(findNumber(sentence));
+            }
+
+            if (covidNews.getDischargesCount() == null && sentence.contains("taburcu")) {
+                covidNews.setDischargesCount(findNumber(sentence));
             }
         }
 
@@ -66,13 +75,31 @@ public class DataProcessingService {
     }
 
     private static String findCity(String inputText) {
+        // Normalize input for turkish characters.
+        String normalizedText = inputText.toLowerCase(new Locale("tr", "TR")).replaceAll("[\\p{Punct}]", " ");;
+
+        // Split to words.
+        String[] words = normalizedText.split("\\s+");
+
         for (String city : cities) {
-            Pattern pattern = Pattern.compile("\\b" + Pattern.quote(city) + "\\b", Pattern.CASE_INSENSITIVE  | Pattern.UNICODE_CASE);
-            Matcher matcher = pattern.matcher(inputText);
-            if (matcher.find()) {
-                return city;
+            // Normalize city values for turkish characters.
+            String normalizedCity = city.trim().toLowerCase(new Locale("tr", "TR"));
+            for (String word : words) {
+                if (word.equals(normalizedCity)) {
+                    return city;
+                }
             }
         }
         return null;
+    }
+
+    private static Integer findNumber(String inputText) {
+        // Regex patter for number format.
+        Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
+        Matcher matcher = pattern.matcher(inputText);
+
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        } else {return null;}
     }
 }

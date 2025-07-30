@@ -1,11 +1,13 @@
 package com.havelsan.api.model;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+@Data
 @Document(collection = "covid_news")
-public class CovidNews {
+public class CovidNewsModel {
 
     @Id
     private String id;
@@ -21,11 +23,11 @@ public class CovidNews {
     private Integer dischargesCount;
     private String theNews;
 
-    public CovidNews() {
+    public CovidNewsModel() {
         // Necessary for MongoDB
     }
 
-    public CovidNews(String date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
+    public CovidNewsModel(String date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
         this.date = date;
         this.city = city;
         this.caseCount = caseCount;
@@ -36,7 +38,7 @@ public class CovidNews {
 
     @Override
     public String toString() {
-        return "CovidNews{" +
+        return "CovidNewsModel{" +
                 "id='" + id + '\'' +
                 ", city='" + city + '\'' +
                 ", date='" + date + '\'' +
@@ -53,48 +55,5 @@ public class CovidNews {
             return true;
         }
         return false;
-    }
-
-    // Getter Setter Methods.
-    public String getDate() {
-        return date;
-    }
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getCity() {
-        return city;
-    }
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public Integer getCaseCount() {
-        return caseCount;
-    }
-    public void setCaseCount(Integer caseCount) {
-        this.caseCount = caseCount;
-    }
-
-    public Integer getDeathCount() {
-        return deathCount;
-    }
-    public void setDeathCount(Integer deathCount) {
-        this.deathCount = deathCount;
-    }
-
-    public Integer getDischargesCount() {
-        return dischargesCount;
-    }
-    public void setDischargesCount(Integer dischargesCount) {
-        this.dischargesCount = dischargesCount;
-    }
-
-    public String getTheNews() {
-        return theNews;
-    }
-    public void setTheNews(String theNews) {
-        this.theNews = theNews;
     }
 }
