@@ -37,8 +37,13 @@ public class ApiController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The news can not be empty");
             } else {
                 CovidNewsDTO dto = service.processAndSave(parseRequestDTO.getInputText());
-                System.out.println("[INFO] DTO: " + dto.toString());
-                return ResponseEntity.ok(dto);
+                if (dto != null) {
+                    System.out.println("[INFO] DTO: " + dto.toString());
+                    return ResponseEntity.ok(dto);
+                } else  {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The news can not be empty");
+                }
+
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

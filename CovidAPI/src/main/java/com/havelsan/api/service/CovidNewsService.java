@@ -4,6 +4,7 @@ import com.havelsan.api.dto.CovidNewsDTO;
 import com.havelsan.api.dto.response.ChartResponseDTO;
 import com.havelsan.api.model.CovidNewsModel;
 import com.havelsan.api.repository.CovidNewsRepository;
+import com.havelsan.api.utils.DtoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,13 @@ public class CovidNewsService {
     public CovidNewsDTO processAndSave(String inputText){
         System.out.println("[INFO] Input text: " + inputText);
         CovidNewsModel covidNewsModel = dataProcessingService.parseNewsAndFillModel(inputText);
-        repo.save(covidNewsModel);
-        return convertToDTO(covidNewsModel);
+        boolean hasNullValeu = DtoUtils.hasNullField(covidNewsModel);
+        if(!hasNullValeu){
+            repo.save(covidNewsModel);
+            return convertToDTO(covidNewsModel);
+        } else {
+            return null;
+        }
     }
 
     public List<CovidNewsDTO> getAllData(){
