@@ -3,6 +3,8 @@ package com.havelsan.api.service;
 import com.havelsan.api.model.CovidNewsModel;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -34,14 +36,20 @@ public class DataProcessingService {
         // Original News
         covidNews.setTheNews(inputText);
 
-        // City and date values can be anywhere in text. That's why no need to split as sentences.
-        covidNews.setDate(findDate(inputText));
+        // Date value detected with string regex operations.
+        // It is converted from String to LocalDate and set to the model.
+        String dateStr = findDate(inputText);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        LocalDate localDate = LocalDate.parse(dateStr, formatter);
+        covidNews.setDate(localDate);
+
+        // City value can be anywhere in text. That's why no need to split as sentences.
         covidNews.setCity(findCity(inputText));
 
         // We've retrieved the date value. We'll separate the sentences using the [.] regex.
         // However, the [.] in the date value can interfere with sentence separation.
         // Therefore, we're removing it from our input because we already have the date data.
-        inputText = inputText.replace(covidNews.getDate(), "DateValue");
+        inputText = inputText.replace(dateStr, "DateValue");
 
         // Numerical values must be in different sentences, so they will be checked according to the sentences.
         String[] sentences = inputText.split("[.]");
@@ -60,7 +68,7 @@ public class DataProcessingService {
                 covidNews.setDischargesCount(findNumber(sentence));
             }
         }
-
+        System.out.println(covidNews.toString());
         return covidNews;
     }
 

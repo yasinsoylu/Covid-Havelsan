@@ -9,14 +9,16 @@ import java.time.LocalDate;
 @Data
 public class CovidNewsDTO {
 
-    private String date;
+    @JsonFormat(pattern = "dd.MM.yyyy",  timezone = "Europe/Istanbul")
+    private LocalDate date;
+
     private String city;
     private Integer caseCount;
     private Integer deathCount;
     private Integer dischargesCount;
     private String theNews;
 
-    public CovidNewsDTO(String date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
+    public CovidNewsDTO(LocalDate date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
         this.date = date;
         this.city = city;
         this.caseCount = caseCount;

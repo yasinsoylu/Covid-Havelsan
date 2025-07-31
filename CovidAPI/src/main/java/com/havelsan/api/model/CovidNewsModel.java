@@ -1,12 +1,16 @@
 package com.havelsan.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDate;
 
 @Data
-@Document(collection = "covid_news")
+@Document(collection = "news_infos")
 public class CovidNewsModel {
 
     @Id
@@ -16,7 +20,9 @@ public class CovidNewsModel {
     private String city;
 
     @Indexed
-    private String date;
+    @JsonFormat(pattern = "dd.MM.yyyy",  timezone = "Europe/Istanbul")
+    @Field("date")
+    private LocalDate date;
 
     private Integer caseCount;
     private Integer deathCount;
@@ -27,7 +33,7 @@ public class CovidNewsModel {
         // Necessary for MongoDB
     }
 
-    public CovidNewsModel(String date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
+    public CovidNewsModel(LocalDate date, String city, Integer caseCount, Integer deathCount, Integer dischargesCount, String theNews) {
         this.date = date;
         this.city = city;
         this.caseCount = caseCount;
