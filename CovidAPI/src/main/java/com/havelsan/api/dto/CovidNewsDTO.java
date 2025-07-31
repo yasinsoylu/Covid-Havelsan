@@ -12,7 +12,9 @@ public class CovidNewsDTO {
     @JsonFormat(pattern = "dd.MM.yyyy",  timezone = "Europe/Istanbul")
     private LocalDate date;
 
+    // It is optional for daily charts.
     private String city;
+
     private Integer caseCount;
     private Integer deathCount;
     private Integer dischargesCount;
