@@ -4,8 +4,8 @@ import com.havelsan.api.dto.CovidNewsDTO;
 import com.havelsan.api.dto.response.ChartResponseDTO;
 import com.havelsan.api.model.CovidNewsModel;
 import com.havelsan.api.repository.CovidNewsRepository;
-import com.havelsan.api.utils.DtoUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,23 +13,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
+@Slf4j
 @Service
 public class CovidNewsService {
-    @Autowired
-    private DataProcessingService dataProcessingService;
-    @Autowired
-    private CovidNewsRepository repo;
+
+    private final DataProcessingService dataProcessingService;
+    private final CovidNewsRepository repo;
 
     public CovidNewsDTO processAndSave(String inputText){
-        System.out.println("[INFO] Input text: " + inputText);
+        log.info("[INFO] Input text: {}" , inputText);
         CovidNewsModel covidNewsModel = dataProcessingService.parseNewsAndFillModel(inputText);
-        boolean hasNullValeu = DtoUtils.hasNullField(covidNewsModel);
-        if(!hasNullValeu){
-            repo.save(covidNewsModel);
-            return convertToDTO(covidNewsModel);
-        } else {
-            return null;
-        }
+        repo.save(covidNewsModel);
+        return convertToDTO(covidNewsModel);
     }
 
     public List<CovidNewsDTO> getAllData(){

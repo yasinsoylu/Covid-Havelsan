@@ -15,3 +15,10 @@ This project has been developed and tested using the following tools and version
 | **Git**     | 2.50.1    |       |
 
 > **Note:** Please make sure the versions above are installed on your system before working with this project.
+
+# libraries
+Required libraries for React:
+- **npm install axios**
+- **npm install recharts**
+
+> The requirements for Spring will be automatically provided by Maven with pom.xml.

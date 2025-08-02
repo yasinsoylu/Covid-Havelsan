@@ -1,10 +1,14 @@
 package com.havelsan.api.service;
 
+import com.havelsan.api.exception.DataProcessingException;
+import com.havelsan.api.exception.InvalidNewsFormatException;
 import com.havelsan.api.model.CovidNewsModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class DataProcessingService {
     private static final List<String> cities = Arrays.asList("Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Aksaray",
             "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin", "Aydın", "Balıkesir", "Bartın", "Batman", "Bayburt",
@@ -23,63 +28,114 @@ public class DataProcessingService {
             "Osmaniye", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Şanlıurfa", "Şırnak", "Tekirdağ",
             "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak");
 
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final Pattern DATE_PATTERN = Pattern.compile("\\b(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\b");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("\\b(\\d+)\\b");
 
-    public static CovidNewsModel parseNewsAndFillModel(String inputText) {
+    public CovidNewsModel parseNewsAndFillModel(String inputText) {
 
         // Input controlling.
         if (inputText == null || inputText.trim().isEmpty()) {
-            return null;
+            throw new InvalidNewsFormatException("Input text can not be null or empty");
         }
 
-        CovidNewsModel covidNews = new CovidNewsModel();
+        try {
+            CovidNewsModel covidNews = new CovidNewsModel();
+            covidNews.setTheNews(inputText);
 
-        // Original News
-        covidNews.setTheNews(inputText);
+            String dateStr = findDate(inputText);
+            log.info("DateStr value is: {} ",dateStr);
+            if (dateStr == null) {
+                throw new InvalidNewsFormatException("Date not found in the news text. Expected format: dd.MM.yyyy");
+            }
 
-        // Date value detected with string regex operations.
-        // It is converted from String to LocalDate and set to the model.
-        String dateStr = findDate(inputText);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate localDate = LocalDate.parse(dateStr, formatter);
-        covidNews.setDate(localDate);
+            // Parse and set: Date
+            LocalDate localDate = parseDate(dateStr);
+            covidNews.setDate(localDate);
 
-        // City value can be anywhere in text. That's why no need to split as sentences.
-        covidNews.setCity(findCity(inputText));
+            // Parse and set: City
+            String city = findCity(inputText);
+            if (city == null) {
+                throw new InvalidNewsFormatException("City not found in the news text.");
+            }
+            covidNews.setCity(city);
 
-        // We've retrieved the date value. We'll separate the sentences using the [.] regex.
-        // However, the [.] in the date value can interfere with sentence separation.
-        // Therefore, we're removing it from our input because we already have the date data.
-        inputText = inputText.replace(dateStr, "DateValue");
+            // Remove date from text to avoid interference with sentence splitting.
+            String processedText = inputText.replace(dateStr, "DateValue");
 
-        // Numerical values must be in different sentences, so they will be checked according to the sentences.
+            // Case, Death and Discharge count parsing.
+            parseCovidValues(processedText, covidNews);
+
+            // Validate Required Fields:
+            validateCovidNewsModel(covidNews);
+
+            log.info("Successfully parsed COVID data: {}", covidNews);
+            return covidNews;
+
+        } catch (InvalidNewsFormatException e) {
+            log.error("Invalid news format: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during news parsing: {}", e.getMessage(), e);
+            throw new DataProcessingException("Failed to process news data", e);
+        }
+    }
+
+    private void parseCovidValues(String inputText, CovidNewsModel covidNews) {
         String[] sentences = inputText.split("[.]");
+
         for (String sentence : sentences) {
-            sentence = sentence.trim().toLowerCase();
+            String normalizedSentence = sentence.trim().toLowerCase(new Locale("tr", "TR"));
 
-            if (covidNews.getCaseCount() == null && sentence.contains("vaka")) {
-                covidNews.setCaseCount(findNumber(sentence));
+            if (covidNews.getCaseCount() == null && normalizedSentence.contains("vaka")) {
+                Integer caseCount = findNumber(normalizedSentence);
+                if (caseCount != null && caseCount >= 0) {
+                    covidNews.setCaseCount(caseCount);
+                    log.debug("Found case count: {}", caseCount);
+                }
             }
 
-            if (covidNews.getDeathCount() == null && sentence.contains("vefat")) {
-                covidNews.setDeathCount(findNumber(sentence));
+            if (covidNews.getDeathCount() == null && normalizedSentence.contains("vefat")) {
+                Integer deathCount = findNumber(normalizedSentence);
+                if (deathCount != null && deathCount >= 0) {
+                    covidNews.setDeathCount(deathCount);
+                    log.debug("Found death count: {}", deathCount);
+                }
             }
 
-            if (covidNews.getDischargesCount() == null && sentence.contains("taburcu")) {
-                covidNews.setDischargesCount(findNumber(sentence));
+            if (covidNews.getDischargesCount() == null && normalizedSentence.contains("taburcu")) {
+                Integer dischargeCount = findNumber(normalizedSentence);
+                if (dischargeCount != null && dischargeCount >= 0) {
+                    covidNews.setDischargesCount(dischargeCount);
+                    log.debug("Found discharge count: {}", dischargeCount);
+                }
             }
         }
-        System.out.println(covidNews.toString());
-        return covidNews;
+    }
+
+    private void validateCovidNewsModel(CovidNewsModel covidNews) {
+        if (covidNews.getCaseCount() == null) {
+            throw new InvalidNewsFormatException("Case count (vaka) not found in the news text");
+        }
+        if (covidNews.getDeathCount() == null) {
+            throw new InvalidNewsFormatException("Death count (vefat) not found in the news text");
+        }
+        if (covidNews.getDischargesCount() == null) {
+            throw new InvalidNewsFormatException("Discharge count (taburcu) not found in the news text");
+        }
     }
 
     private static String findDate(String inputText) {
-        // Regex patter for date format: dd.mm.yyyy
-        Pattern pattern = Pattern.compile("\\b(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\b");
-        Matcher matcher = pattern.matcher(inputText);
+        Matcher matcher = DATE_PATTERN.matcher(inputText);
+        return matcher.find() ? matcher.group() : null;
+    }
 
-        if (matcher.find()) {
-            return matcher.group();
-        } else {return null;}
+    private LocalDate parseDate(String dateStr) {
+        try {
+            return LocalDate.parse(dateStr, DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new InvalidNewsFormatException("Invalid date format: " + dateStr + ". Expected format: dd.MM.yyyy");
+        }
     }
 
     private static String findCity(String inputText) {
@@ -102,12 +158,14 @@ public class DataProcessingService {
     }
 
     private static Integer findNumber(String inputText) {
-        // Regex patter for number format.
-        Pattern pattern = Pattern.compile("\\b(\\d+)\\b");
-        Matcher matcher = pattern.matcher(inputText);
-
+        Matcher matcher = NUMBER_PATTERN.matcher(inputText);
         if (matcher.find()) {
-            return Integer.parseInt(matcher.group());
-        } else {return null;}
+            try {
+                return Integer.parseInt(matcher.group());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }
