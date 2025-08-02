@@ -21,7 +21,7 @@ function NewsForm() {
     .then(function(response) {
       console.log('Success:', response.data);
       setResult(response.data);
-      setNewsText('');
+      //setNewsText('');
       setError('');
     })
     .catch(function(error) {
