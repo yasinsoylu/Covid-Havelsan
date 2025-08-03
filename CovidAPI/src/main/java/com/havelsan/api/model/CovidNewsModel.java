@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 
+// BASE MODEL
 @Data
 @Document(collection = "news_infos")
 public class CovidNewsModel {

@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+// Data Transfer Object Class
 @Data
 public class CovidNewsDTO {
 

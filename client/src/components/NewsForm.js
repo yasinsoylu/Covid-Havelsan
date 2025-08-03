@@ -21,7 +21,6 @@ function NewsForm() {
     .then(function(response) {
       console.log('Success:', response.data);
       setResult(response.data);
-      //setNewsText('');
       setError('');
     })
     .catch(function(error) {
@@ -29,7 +28,7 @@ function NewsForm() {
       if (error.response && error.response.data && error.response.data.message) {
       setError(error.response.data.message);
     } else {
-      setError("Bilinmeyen bir hata oluştu.");
+      setError("An unknown error occurred.");
     }
       setResult(null);
     });
@@ -47,7 +46,7 @@ function NewsForm() {
         <textarea
           value={newsText}
           onChange={function(e) { setNewsText(e.target.value); }}
-          placeholder="Enter your news in this area..."
+          placeholder="Enter your news in here."
           style={{
             width: '100%',
             height: '100px',
@@ -78,7 +77,7 @@ function NewsForm() {
           marginTop: '10px',
           borderRadius: '5px'
         }}>
-          <h4>✅ Success!</h4>
+          <h4>Success!</h4>
           <p>Date: {result.date}</p>
           <p>City: {result.city}</p>
           <p>Case: {result.caseCount}</p>

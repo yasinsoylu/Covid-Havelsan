@@ -21,7 +21,6 @@ function ChartComponent() {
       .then(function(response) {
         console.log('Response Data:', response.data);
         
-        // Veriyi basit hale getir
         let chartData = [];
         for(let i = 0; i < response.data.length; i++) {
           let item = response.data[i];
@@ -42,13 +41,11 @@ function ChartComponent() {
       });
   }
 
-  // Şehir listesini getir
   function getCities() {
     axios.get('http://localhost:8080/covid/api/get/all')
       .then(function(response) {
         console.log('All Data:', response.data);
         
-        // Veri olan şehirleri çıkar
         let citiesWithData = [];
         for(let i = 0; i < response.data.length; i++) {
           let city = response.data[i].city;
@@ -57,7 +54,6 @@ function ChartComponent() {
           }
         }
         
-        // Alfabetik sırala
         citiesWithData.sort();
         setCities(citiesWithData);
         console.log('The available cities:', citiesWithData);

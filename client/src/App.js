@@ -10,7 +10,7 @@ function App() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     
         <div>
-          <h1>COVID DATA</h1>
+          <h1>COVID DATA PROJECT</h1>
         </div>
 
         <img 
@@ -32,7 +32,7 @@ function App() {
             cursor: 'pointer'
           }}
         >
-          Add Data
+          Add New Data
         </button>
         
         <button 
@@ -45,7 +45,7 @@ function App() {
             cursor: 'pointer'
           }}
         >
-          Report
+          View Reports
         </button>
       </div>
       

@@ -14,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+// EXCEPTION HANDLER CLASS
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
