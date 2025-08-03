@@ -78,12 +78,12 @@ function NewsForm() {
           marginTop: '10px',
           borderRadius: '5px'
         }}>
-          <h4>✅ Başarılı!</h4>
-          <p>Tarih: {result.date}</p>
-          <p>Şehir: {result.city}</p>
-          <p>Vaka: {result.caseCount}</p>
-          <p>Vefat: {result.deathCount}</p>
-          <p>Taburcu: {result.dischargesCount}</p>
+          <h4>✅ Success!</h4>
+          <p>Date: {result.date}</p>
+          <p>City: {result.city}</p>
+          <p>Case: {result.caseCount}</p>
+          <p>Death: {result.deathCount}</p>
+          <p>Discharges: {result.dischargesCount}</p>
         </div>
       )}
     </div>
