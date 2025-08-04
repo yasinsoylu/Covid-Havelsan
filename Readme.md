@@ -35,7 +35,7 @@ Required libraries for React:
 
 > Tip: I added the test data I used locally to the "Test Dataset" folder. It can be used as the base data for the charts in the React interface. If you want to use it, you can import it directly into the database using MongoDB Compass.
 
-## 📦 Database Table Attributes
+## Database Table Attributes
 
 The following attributes are used in the MongoDB collection for storing COVID-related news and statistics:
 
@@ -52,16 +52,16 @@ The following attributes are used in the MongoDB collection for storing COVID-re
 # User Interface
 
 ### New Data
-![alt text](image.png)
+![images](./img/image.png)
 
 ### All Data Report - Daily
-![alt text](image-1.png)
+![images](./img/image-1.png)
 
 ### All Data Report - Cumulative 
-![alt text](image-2.png)
+![images](./img/image-2.png)
 
 ### City Report - Daily
-![alt text](image-3.png)
+![images](./img/image-3.png)
 
 ### City Report - Cumulative
-![alt text](image-4.png)
+![images](./img/image-4.png)
